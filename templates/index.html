@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="StadiumIQ - The AI-powered FIFA World Cup 2026 Smart Stadium Assistant. Find navigation, sustainability tips, crowd management advice, match schedules, and multilingual support.">
+    <title>StadiumIQ - FIFA World Cup 2026 Smart Stadium Assistant</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <!-- Skip Navigation Link for Accessibility -->
+    <a href="#main-content" class="skip-link" id="skip-link-nav">Skip to main content</a>
+
+    <!-- Background Particle Canvas (Three.js) -->
+    <canvas id="bg-canvas" class="background-canvas" aria-hidden="true"></canvas>
+
+    <!-- App Container -->
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="app-header" role="banner">
+            <div class="header-logo">
+                <i class="fa-solid fa-trophy brand-icon" aria-hidden="true"></i>
+                <div class="brand-text">
+                    <h1>StadiumIQ</h1>
+                    <span class="sub-brand">FIFA World Cup 2026</span>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <!-- Language Selector -->
+                <div class="language-picker">
+                    <label for="lang-select" class="sr-only">Select Language</label>
+                    <i class="fa-solid fa-globe lang-icon" aria-hidden="true"></i>
+                    <select id="lang-select" class="styled-select" aria-label="Select Language">
+                        <option value="English" selected>English</option>
+                        <option value="Spanish">Español</option>
+                        <option value="French">Français</option>
+                        <option value="Arabic">العربية</option>
+                        <option value="Portuguese">Português</option>
+                        <option value="German">Deutsch</option>
+                        <option value="Japanese">日本語</option>
+                        <option value="Hindi">हिन्दी</option>
+                    </select>
+                </div>
+                <!-- Status Badge -->
+                <div class="status-badge" id="app-status" aria-live="polite">
+                    <span class="status-dot online"></span>
+                    <span class="status-text">Connected</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            
+            <!-- Sidebar Navigation -->
+            <aside class="sidebar" role="complementary" aria-label="Persona and Navigation Controls">
+                <!-- Persona Selection -->
+                <div class="sidebar-section">
+                    <h2 class="section-title">Select Persona</h2>
+                    <div class="persona-grid" role="radiogroup" aria-label="User Persona Selector">
+                        <button class="persona-btn active" id="persona-fan" role="radio" aria-checked="true" data-persona="Fan">
+                            <i class="fa-solid fa-users icon-fan" aria-hidden="true"></i>
+                            <span>Fan</span>
+                        </button>
+                        <button class="persona-btn" id="persona-staff" role="radio" aria-checked="false" data-persona="Staff">
+                            <i class="fa-solid fa-user-shield icon-staff" aria-hidden="true"></i>
+                            <span>Staff</span>
+                        </button>
+                        <button class="persona-btn" id="persona-volunteer" role="radio" aria-checked="false" data-persona="Volunteer">
+                            <i class="fa-solid fa-hands-helping icon-volunteer" aria-hidden="true"></i>
+                            <span>Volunteer</span>
+                        </button>
+                        <button class="persona-btn" id="persona-accessibility" role="radio" aria-checked="false" data-persona="Accessibility">
+                            <i class="fa-solid fa-wheelchair icon-accessibility" aria-hidden="true"></i>
+                            <span>Accessibility</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Desktop Sidebar Tabs -->
+                <nav class="sidebar-nav" role="navigation" aria-label="Desktop Navigation">
+                    <h2 class="section-title">Features</h2>
+                    <div class="nav-links">
+                        <button class="nav-link active" id="tab-btn-chat" data-target="panel-chat" aria-current="page">
+                            <i class="fa-solid fa-comments" aria-hidden="true"></i>
+                            <span>AI Assistant</span>
+                        </button>
+                        <button class="nav-link" id="tab-btn-nav" data-target="panel-navigation">
+                            <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
+                            <span>Stadium Nav</span>
+                        </button>
+                        <button class="nav-link" id="tab-btn-match" data-target="panel-match">
+                            <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
+                            <span>Match Schedule</span>
+                        </button>
+                        <button class="nav-link" id="tab-btn-crowd" data-target="panel-crowd">
+                            <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+                            <span>Crowd Control</span>
+                        </button>
+                        <button class="nav-link" id="tab-btn-sustainability" data-target="panel-sustainability">
+                            <i class="fa-solid fa-leaf" aria-hidden="true"></i>
+                            <span>Eco Initiative</span>
+                        </button>
+                    </div>
+                </nav>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="main-content" id="main-content" role="main" tabindex="-1">
+                
+                <!-- 1. AI CHAT ASSISTANT PANEL -->
+                <section class="panel-section active" id="panel-chat" aria-label="AI Chat Assistant">
+                    <div class="panel-header">
+                        <div class="panel-info">
+                            <h2 class="panel-title">AI Smart Assistant</h2>
+                            <p class="panel-subtitle" id="chat-persona-indicator">Currently guiding you in Fan Mode</p>
+                        </div>
+                        <button class="action-btn" id="clear-chat-btn" aria-label="Clear chat history">
+                            <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                            <span>Clear Chat</span>
+                        </button>
+                    </div>
+                    
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chat-box" role="log" aria-live="polite" aria-relevant="additions">
+                            <!-- Welcome Message -->
+                            <div class="chat-message assistant-message">
+                                <div class="message-meta">
+                                    <span class="message-sender"><i class="fa-solid fa-robot" aria-hidden="true"></i> StadiumIQ</span>
+                                    <span class="message-time">Just Now</span>
+                                </div>
+                                <div class="message-content">
+                                    Welcome to the FIFA World Cup 2026 Smart Stadium Assistant! I can help you with stadium navigation, crowd management, accessibility routes, eco-transportation, and real-time decision support. How can I help you today?
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chat Input Form -->
+                        <form class="chat-input-form" id="chat-form" novalidate>
+                            <label for="chat-message-input" class="sr-only">Type your message</label>
+                            <input type="text" id="chat-message-input" class="chat-input" placeholder="Ask about gates, accessibility, transit, etc..." autocomplete="off" maxlength="2000" required>
+                            <button type="submit" id="chat-send-btn" class="send-btn" aria-label="Send message">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M3 12.75L21 3l-9 18-3-7.5L3 12.75z" fill="currentColor" />
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- 2. STADIUM NAVIGATION PANEL -->
+                <section class="panel-section" id="panel-navigation" aria-label="Stadium Navigation Guide">
+                    <div class="panel-header">
+                        <div class="panel-info">
+                            <h2 class="panel-title">Interactive Zone Guide</h2>
+                            <p class="panel-subtitle">Explore entrances, parking zones, elevators, and accessibility channels.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="navigation-grid">
+                        <div class="stadium-map-container glass-card">
+                            <div class="visual-map" id="visual-map-display">
+                                <!-- Interactive Zone Map using SVG -->
+                                <svg viewBox="0 0 400 400" width="100%" height="100%" class="stadium-svg" aria-label="Stadium Floor Plan Layout">
+                                    <circle cx="200" cy="200" r="180" class="stadium-ring-outer" />
+                                    <circle cx="200" cy="200" r="140" class="stadium-ring-middle" />
+                                    <circle cx="200" cy="200" r="100" class="stadium-ring-inner" />
+                                    <rect x="150" y="150" width="100" height="100" class="stadium-pitch" rx="10" />
+                                    
+                                    <!-- Zones clickable -->
+                                    <path d="M 200,200 L 200,20 A 180,180 0 0,1 380,200 Z" class="map-zone" id="zone-north" role="button" aria-label="North Stand - General Admission, Gate A" tabindex="0" />
+                                    <path d="M 200,200 L 380,200 A 180,180 0 0,1 200,380 Z" class="map-zone" id="zone-east" role="button" aria-label="East Stand - Family Zone, Gate B" tabindex="0" />
+                                    <path d="M 200,200 L 200,380 A 180,180 0 0,1 20,200 Z" class="map-zone" id="zone-south" role="button" aria-label="South Stand - Accessibility Entrance, Elevators, Gate C" tabindex="0" />
+                                    <path d="M 200,200 L 20,200 A 180,180 0 0,1 200,20 Z" class="map-zone" id="zone-west" role="button" aria-label="West Stand - VIP/Press Box, Gate D" tabindex="0" />
+
+                                    <!-- Markers -->
+                                    <circle cx="200" cy="40" r="8" class="map-marker gate-marker" id="marker-gate-a" />
+                                    <circle cx="360" cy="200" r="8" class="map-marker gate-marker" id="marker-gate-b" />
+                                    <circle cx="200" cy="360" r="8" class="map-marker accessibility-marker" id="marker-gate-c" />
+                                    <circle cx="40" cy="200" r="8" class="map-marker emergency-marker" id="marker-gate-d" />
+                                </svg>
+                            </div>
+                            <div class="map-legend">
+                                <span class="legend-item"><span class="legend-color gate"></span>Gate Entrance</span>
+                                <span class="legend-item"><span class="legend-color accessibility"></span>ADA Elevators / Ramp</span>
+                                <span class="legend-item"><span class="legend-color emergency"></span>Emergency Exit</span>
+                            </div>
+                        </div>
+                        
+                        <div class="navigation-info-panel glass-card">
+                            <h3>Zone Navigation Center</h3>
+                            <p class="select-hint-text">Click or focus on a zone on the stadium plan to view detailed operational directions.</p>
+                            <div class="zone-details-box" id="zone-details-display" aria-live="polite">
+                                <h4 id="zone-display-title">Select a Stand / Section</h4>
+                                <div class="zone-features-list" id="zone-display-content">
+                                    <p>Select any section of the stadium diagram to see real-time routes, accessibility info, gate locations, and closest transportation links.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. MATCH INFO PANEL -->
+                <section class="panel-section" id="panel-match" aria-label="Match Schedule and Venues">
+                    <div class="panel-header">
+                        <div class="panel-info">
+                            <h2 class="panel-title">FIFA 2026 Match Schedule</h2>
+                            <p class="panel-subtitle">Plan your matchday schedule across host cities in US, Canada, and Mexico.</p>
+                        </div>
+                    </div>
+
+                    <div class="matches-container glass-card">
+                        <div class="table-responsive">
+                            <table class="schedule-table" id="schedule-data-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Match ID</th>
+                                        <th scope="col">Host City</th>
+                                        <th scope="col">Stadium</th>
+                                        <th scope="col">Date</th>
+                                        <th scope="col">Featured Teams</th>
+                                        <th scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>M01</td>
+                                        <td>Mexico City</td>
+                                        <td>Estadio Azteca</td>
+                                        <td>June 11, 2026</td>
+                                        <td>Mexico vs Group A2</td>
+                                        <td><button class="info-details-btn" data-city="Mexico City" aria-label="View Estadio Azteca details">Details</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>M02</td>
+                                        <td>Toronto</td>
+                                        <td>BMO Field</td>
+                                        <td>June 12, 2026</td>
+                                        <td>Canada vs Group B2</td>
+                                        <td><button class="info-details-btn" data-city="Toronto" aria-label="View BMO Field details">Details</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>M03</td>
+                                        <td>Los Angeles</td>
+                                        <td>SoFi Stadium</td>
+                                        <td>June 12, 2026</td>
+                                        <td>USA vs Group C2</td>
+                                        <td><button class="info-details-btn" data-city="Los Angeles" aria-label="View SoFi Stadium details">Details</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>M04</td>
+                                        <td>Dallas</td>
+                                        <td>AT&T Stadium</td>
+                                        <td>June 14, 2026</td>
+                                        <td>Group D1 vs Group D2</td>
+                                        <td><button class="info-details-btn" data-city="Dallas" aria-label="View AT&T Stadium details">Details</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>M05</td>
+                                        <td>Miami</td>
+                                        <td>Hard Rock Stadium</td>
+                                        <td>June 15, 2026</td>
+                                        <td>Group E1 vs Group E2</td>
+                                        <td><button class="info-details-btn" data-city="Miami" aria-label="View Hard Rock Stadium details">Details</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>M06</td>
+                                        <td>New York/New Jersey</td>
+                                        <td>MetLife Stadium</td>
+                                        <td>June 16, 2026</td>
+                                        <td>Group F1 vs Group F2</td>
+                                        <td><button class="info-details-btn" data-city="New York/New Jersey" aria-label="View MetLife Stadium details">Details</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. CROWD MANAGEMENT PANEL -->
+                <section class="panel-section" id="panel-crowd" aria-label="Crowd Control Density Visualizer">
+                    <div class="panel-header">
+                        <div class="panel-info">
+                            <h2 class="panel-title">Crowd Density Simulation</h2>
+                            <p class="panel-subtitle">Real-time crowd flow, density indicators, and safe evacuation guidelines.</p>
+                        </div>
+                        <div class="simulation-controls">
+                            <button class="action-btn" id="simulate-density-btn" aria-label="Update crowd simulation density">
+                                <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+                                <span>Recalculate Flow</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="crowd-grid">
+                        <div class="crowd-visualizer-container glass-card">
+                            <canvas id="crowd-canvas" class="crowd-canvas" aria-label="Crowd Density Visualizer Canvas Grid" tabindex="0"></canvas>
+                        </div>
+                        
+                        <div class="crowd-metrics glass-card">
+                            <h3>Real-Time Crowd Metrics</h3>
+                            
+                            <div class="metric-card">
+                                <div class="metric-info">
+                                    <span class="metric-title">Overall Density</span>
+                                    <span class="metric-value" id="metric-density-val">Moderate (54%)</span>
+                                </div>
+                                <div class="metric-bar-container">
+                                    <div class="metric-bar" id="metric-density-bar" style="width: 54%; background-color: #f39c12;"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-alerts" id="density-alerts-box" aria-live="polite">
+                                <div class="alert-item warning">
+                                    <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                                    <div>
+                                        <strong>Gate B Congestion</strong>
+                                        <p>High traffic density detected near east stand. Safe zone alternates: Route via South Gate C.</p>
+                                    </div>
+                                </div>
+                                <div class="alert-item success">
+                                    <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                                    <div>
+                                        <strong>Evacuation Routes Clear</strong>
+                                        <p>Emergency exits and elevator banks fully clear. Accessibility flows optimal.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="evac-guide">
+                                <h4>Decision Support Evacuation Steps</h4>
+                                <ol class="evac-steps">
+                                    <li>Refer to nearest green indicator exit routes.</li>
+                                    <li>Keep corridors and ramps clear for accessibility wheels.</li>
+                                    <li>Follow instructions from staff members on the floor.</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. SUSTAINABILITY PANEL -->
+                <section class="panel-section" id="panel-sustainability" aria-label="Sustainability Initiatives and Tips">
+                    <div class="panel-header">
+                        <div class="panel-info">
+                            <h2 class="panel-title">Green Initiatives</h2>
+                            <p class="panel-subtitle">Our commitment to holding a sustainable FIFA World Cup tournament.</p>
+                        </div>
+                    </div>
+
+                    <div class="eco-grid">
+                        <div class="eco-card glass-card">
+                            <div class="eco-icon-wrapper" aria-hidden="true">
+                                <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+                                    <rect x="8" y="18" width="48" height="24" rx="6" ry="6" />
+                                    <rect x="14" y="24" width="12" height="8" rx="2" ry="2" />
+                                    <rect x="38" y="24" width="12" height="8" rx="2" ry="2" />
+                                    <circle cx="20" cy="48" r="6" />
+                                    <circle cx="44" cy="48" r="6" />
+                                </svg>
+                            </div>
+                            <h3>Green Transportation</h3>
+                            <p>Utilize integrated stadium transit systems. We provide electric shuttle pathways and secured bicycle lock stations at all entrances.</p>
+                        </div>
+                        <div class="eco-card glass-card">
+                            <div class="eco-icon-wrapper" aria-hidden="true">
+                                <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+                                    <path d="M32 10a22 22 0 1 0 22 22A22 22 0 0 0 32 10zm0 40a18 18 0 1 1 18-18 18 18 0 0 1-18 18z" />
+                                    <path d="M34 16l-8 8h6v6l8-8h-6zm8 22a6 6 0 0 1-6 6h-4v6h4a12 12 0 0 0 0-24h-6v6h6a6 6 0 0 1 6 6zm-20 2a6 6 0 0 1 6-6h4v-6h-4a12 12 0 0 0 0 24h6v-6h-6a6 6 0 0 1-6-6z" />
+                                </svg>
+                            </div>
+                            <h3>Zero Waste Program</h3>
+                            <p>Ensure composting and recycling bins are utilized. All tournament food vendors use 100% biodegradable and compostable packages.</p>
+                        </div>
+                        <div class="eco-card glass-card">
+                            <div class="eco-icon-wrapper" aria-hidden="true">
+                                <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+                                    <circle cx="32" cy="32" r="10" />
+                                    <path d="M32 2v10m0 40v10m30-30H42m-20 0H2m43.7-19.7l-7.1 7.1m-25.2 25.2l-7.1 7.1m0-32.3l7.1 7.1m25.2 25.2l7.1 7.1" stroke-width="4" stroke="currentColor" stroke-linecap="round" fill="none" />
+                                </svg>
+                            </div>
+                            <h3>Renewable energy</h3>
+                            <p>Stadias are optimized with retrofitted micro solar installations and smart grid micro-coolings, conserving up to 40% more electricity.</p>
+                        </div>
+                    </div>
+
+                    <div class="eco-tips-section glass-card">
+                        <h3>Fan Eco-Challenge: Be an Agent of Change</h3>
+                        <div class="tips-accordion">
+                            <details class="tip-detail" open>
+                                <summary class="tip-summary">Bring reusable water containers</summary>
+                                <div class="tip-content">
+                                    Multiple filtered water refilling stations are placed next to every major elevator bank. Refill for free and reduce plastic footprint!
+                                </div>
+                            </details>
+                            <details class="tip-detail">
+                                <summary class="tip-summary">Sort your waste at the bins</summary>
+                                <div class="tip-content">
+                                    Color-coded disposal bins are situated across all food court walkways. Green for compostable items, blue for recycling, black for trash.
+                                </div>
+                            </details>
+                            <details class="tip-detail">
+                                <summary class="tip-summary">Take public transit routes</summary>
+                                <div class="tip-content">
+                                    Your matchday stadium pass includes complimentary light-rail, streetcars, and electric transit shuttle access. Safe, cheap, and eco-friendly!
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+                </section>
+                
+            </main>
+        </div>
+
+        <!-- Footer -->
+        <footer class="app-footer" role="contentinfo">
+            <p>&copy; 2026 FIFA Smart Tournament Operations. Built for PromptWars: Virtual Challenge 4.</p>
+        </footer>
+
+        <!-- Mobile Bottom Navigation Bar -->
+        <nav class="mobile-nav" role="navigation" aria-label="Mobile Navigation">
+            <button class="mobile-nav-link active" id="mob-btn-chat" data-target="panel-chat" aria-current="page">
+                <i class="fa-solid fa-comments" aria-hidden="true"></i>
+                <span>Chat</span>
+            </button>
+            <button class="mobile-nav-link" id="mob-btn-nav" data-target="panel-navigation">
+                <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
+                <span>Nav</span>
+            </button>
+            <button class="mobile-nav-link" id="mob-btn-match" data-target="panel-match">
+                <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
+                <span>Matches</span>
+            </button>
+            <button class="mobile-nav-link" id="mob-btn-crowd" data-target="panel-crowd">
+                <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+                <span>Crowd</span>
+            </button>
+            <button class="mobile-nav-link" id="mob-btn-sustainability" data-target="panel-sustainability">
+                <i class="fa-solid fa-leaf" aria-hidden="true"></i>
+                <span>Eco</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- GSAP for Smooth Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <!-- Three.js for Particle Backgrounds -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- App Main Script -->
+    <script src="/static/script.js"></script>
+</body>
+</html>

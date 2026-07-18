@@ -1,0 +1,7 @@
+flask
+flask-limiter
+gunicorn
+groq==0.11.0
+httpx<0.28
+pytest
+pytest-cov
