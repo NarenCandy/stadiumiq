@@ -31,16 +31,15 @@ python app.py
 
 5. Open http://127.0.0.1:5000
 
-## Docker
-Build and run locally without storing secrets in the repository:
+## Deployment
 
-```bash
-docker build -t stadiumiq .
-docker run -e GROQ_API_KEY=your_api_key -p 10000:10000 stadiumiq
-```
+The application is deployed on Render and running at:
 
-## Render Deployment
-`render.yaml` is configured for Render with `GROQ_API_KEY` supplied as an environment variable.
+https://stadiumiq-t1rh.onrender.com/
+
+Render configuration is provided in `render.yaml`. The service uses the `GROQ_API_KEY` environment variable supplied via Render's dashboard.
+
+Note about Docker: an earlier draft referenced a `Dockerfile`. This repository no longer includes a `Dockerfile` to avoid confusion — deployment is configured to use Render's Python environment. If you prefer a containerized deployment, I can add a maintained `Dockerfile` and CI steps for it.
 
 ## Quality Checks
 - `python -m flake8 app tests`
@@ -58,5 +57,5 @@ docker run -e GROQ_API_KEY=your_api_key -p 10000:10000 stadiumiq
 - `tests/` — pytest suite
 
 ## Environment
-- `GROQ_API_KEY` must be provided at runtime
-- No secret files are committed to the repository
+- `GROQ_API_KEY` must be provided at runtime (set as an environment variable on Render or locally)
+- No secret files are committed to the repository. Remove any local `.env` files before pushing public code.
