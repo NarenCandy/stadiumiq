@@ -49,7 +49,7 @@ class LRUCache:
         if max_size <= 0:
             raise ValueError("Cache size must be positive.")
         self.max_size: int = max_size
-        self._store: OrderedDict[str, str] = OrderedDict()
+        self._cache: OrderedDict[str, str] = OrderedDict()
         self._lock: threading.Lock = threading.Lock()
 
     def get(self, key: str) -> Optional[str]:
@@ -66,10 +66,10 @@ class LRUCache:
         """
         try:
             with self._lock:
-                if key not in self._store:
+                if key not in self._cache:
                     return None
-                cached_value = self._store.pop(key)
-                self._store[key] = cached_value
+                cached_value = self._cache.pop(key)
+                self._cache[key] = cached_value
                 return cached_value
         except Exception as cache_error:
             logger.error("Cache get failed for key=%s: %s", key, cache_error)
@@ -89,11 +89,11 @@ class LRUCache:
         """
         try:
             with self._lock:
-                if key in self._store:
-                    self._store.pop(key)
-                elif len(self._store) >= self.max_size:
-                    self._store.popitem(last=False)
-                self._store[key] = value
+                if key in self._cache:
+                    self._cache.pop(key)
+                elif len(self._cache) >= self.max_size:
+                    self._cache.popitem(last=False)
+                self._cache[key] = value
         except Exception as cache_error:
             logger.error("Cache set failed for key=%s: %s", key, cache_error)
             raise CacheError(f"Error updating cache: {cache_error}") from cache_error
@@ -106,7 +106,7 @@ class LRUCache:
         """
         try:
             with self._lock:
-                self._store.clear()
+                self._cache.clear()
         except Exception as cache_error:
             logger.error("Cache clear failed: %s", cache_error)
             raise CacheError(f"Error clearing cache: {cache_error}") from cache_error

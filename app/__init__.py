@@ -37,18 +37,23 @@ limiter: Limiter = Limiter(
 )
 
 
-def create_app(config_class: type = AppConfig) -> Flask:
-    """Create, configure, and return a Flask application instance.
+def create_app(config_class: type[AppConfig] = AppConfig) -> Flask:
+    """Create and configure the Flask application instance.
 
-    Registers security headers, the chat Blueprint, and all global error
-    handlers.  Rate limiting is disabled when the app is in TESTING mode.
+    Registers the chat Blueprint, security headers, rate limiting, and global
+    error handlers. Rate limiting is disabled automatically when the app is in
+    TESTING mode.
 
     Args:
-        config_class: The configuration dataclass to instantiate.  Defaults
-            to AppConfig.
+        config_class: Configuration class to use for app setup. Defaults to
+            AppConfig.
 
     Returns:
-        A fully configured Flask application instance.
+        A fully configured Flask application instance with all blueprints,
+        middleware, and extensions registered.
+
+    Raises:
+        ValueError: If configuration validation fails during setup.
     """
     app = Flask(
         __name__,

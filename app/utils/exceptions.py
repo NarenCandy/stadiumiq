@@ -1,17 +1,24 @@
-"""Custom exceptions for the StadiumIQ application.
+"""Custom exception hierarchy for the StadiumIQ application.
 
-This module defines the base exception hierarchy used for handling failures
-in input validation, Groq AI services, caching, and transportation lookups.
-All application-specific exceptions subclass StadiumIQError so callers can
-catch the entire hierarchy with a single except clause when needed.
+This module defines a structured exception hierarchy rooted at
+StadiumIQError. All application-specific exceptions inherit from this base
+class, enabling callers to catch all domain errors with a single except clause
+while still distinguishing the error type.
 
-Main exports:
-    StadiumIQError, AIServiceError, ValidationError, CacheError,
-    TransportationError
+Exception hierarchy:
+    StadiumIQError (base)
+    ├── AIServiceError    — Groq API failures
+    ├── ValidationError   — Input validation failures
+    ├── CacheError        — LRU cache operation failures
+    ├── ConfigurationError — Application configuration issues
+    └── TransportationError — Transportation data lookup failures
 
-Typical usage example:
-    from app.utils.exceptions import AIServiceError, ValidationError
-    raise ValidationError("Message cannot be empty")
+Example:
+    try:
+        response = ai_service.generate_response(message, persona)
+    except AIServiceError as error:
+        logger.error("AI service failed: %s", error)
+        raise
 """
 
 
@@ -47,6 +54,15 @@ class CacheError(StadiumIQError):
 
     Raised by LRUCache when an unexpected error occurs during get, set, or
     clear operations.
+    """
+
+
+class ConfigurationError(StadiumIQError):
+    """Raised when application configuration is invalid or incomplete.
+
+    Example:
+        if not config.GROQ_API_KEY:
+            raise ConfigurationError("GROQ_API_KEY is required")
     """
 
 

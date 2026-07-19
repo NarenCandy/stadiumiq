@@ -15,13 +15,15 @@ Typical usage example:
 
 import logging
 import time
-from typing import Tuple
+from typing import Optional, Tuple
 from uuid import uuid4
 
 from flask import Blueprint, Response, current_app, jsonify, render_template, request
 
 from app import limiter
+from app.config import AppConfig
 from app.constants import CACHE_SIZE, HTTP_OK
+from app.models.request_models import ChatRequest
 from app.services.ai_service import AIService
 from app.utils.cache import LRUCache
 from app.utils.validators import validate_chat_request
@@ -137,27 +139,24 @@ def _generate_session_id() -> str:
     return str(uuid4())
 
 
-def _build_cache_key(chat_request: object) -> str:
+def _build_cache_key(chat_request: ChatRequest) -> str:
     """Construct a deterministic LRU cache key from request fields.
 
     Args:
-        chat_request: A ChatRequest instance with persona, language, and
-            message attributes.
+        chat_request: A validated ChatRequest instance with persona,
+            language, and message attributes.
 
     Returns:
         A colon-delimited cache key string.
     """
-    return (
-        f"{chat_request.persona}:{chat_request.language}:"  # type: ignore[attr-defined]
-        f"{chat_request.message.lower()}"  # type: ignore[attr-defined]
-    )
+    return f"{chat_request.persona}:{chat_request.language}:{chat_request.message.lower()}"
 
 
-def _get_cached_response(chat_request: object) -> object:
+def _get_cached_response(chat_request: ChatRequest) -> Optional[str]:
     """Look up a cached response for the given request.
 
     Args:
-        chat_request: A ChatRequest instance.
+        chat_request: A validated ChatRequest instance.
 
     Returns:
         The cached response string if present, otherwise None.
@@ -166,7 +165,7 @@ def _get_cached_response(chat_request: object) -> object:
     return response_cache.get(cache_key)
 
 
-def _invoke_ai_service(chat_request: object, config: object) -> str:
+def _invoke_ai_service(chat_request: ChatRequest, config: AppConfig) -> str:
     """Instantiate AIService and generate a response for the request.
 
     Args:
@@ -176,16 +175,16 @@ def _invoke_ai_service(chat_request: object, config: object) -> str:
     Returns:
         The generated response string.
     """
-    service = AIService(config)  # type: ignore[arg-type]
+    service = AIService(config)
     return service.generate_response(
-        message=chat_request.message,  # type: ignore[attr-defined]
-        persona=chat_request.persona,  # type: ignore[attr-defined]
-        language=chat_request.language,  # type: ignore[attr-defined]
-        history=chat_request.history,  # type: ignore[attr-defined]
+        message=chat_request.message,
+        persona=chat_request.persona,
+        language=chat_request.language,
+        history=chat_request.history,
     )
 
 
-def _store_in_cache(chat_request: object, response_text: str) -> None:
+def _store_in_cache(chat_request: ChatRequest, response_text: str) -> None:
     """Store a generated response in the LRU cache.
 
     Args:

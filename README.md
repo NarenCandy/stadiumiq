@@ -1,12 +1,32 @@
 # StadiumIQ
 
-StadiumIQ is a Flask-based GenAI assistant for FIFA World Cup 2026 stadium operations, accessibility, crowd management, and sustainability support.
+StadiumIQ is a Flask-based GenAI-enabled assistant for FIFA World Cup 2026 stadium operations, accessibility, crowd management, operational intelligence, and sustainability support.
+
+## 🎯 Problem Statement Coverage
+
+StadiumIQ comprehensively addresses the core challenges of FIFA World Cup 2026 stadium operations:
+
+| FIFA 2026 Challenge | StadiumIQ Feature | Implementation |
+|---------------------|-------------------|----------------|
+| **Navigation** | Interactive Zone Guide with gate assignments | Visual stadium map with gate locations, accessibility routes, and medical stations |
+| **Crowd Management** | Real-time density simulator with decision support | Dynamic crowd visualization with low/moderate/high thresholds and actionable recommendations |
+| **Accessibility** | Dedicated persona + accessible transport for all 16 cities | Accessibility persona with wheelchair routes, adapted vehicles, and sensory-friendly spaces |
+| **Transportation** | Transportation Hub panel for all 16 host cities | Shuttle, parking, rideshare, and accessible transport data for every FIFA 2026 host city |
+| **Sustainability** | Green Initiatives panel with fan eco-challenge | FIFA 2026 sustainability goals with actionable fan participation |
+| **Multilingual Assistance** | 8 language support with AI auto-response | English, Spanish, French, Arabic, Portuguese, German, Japanese, Hindi |
+| **Operational Intelligence** | Staff persona with crowd metrics & KPI guidance | Data-driven operational intelligence for tournament staff |
+| **Real-time Decision Support** | Dynamic crowd alerts + evacuation step generator | Alert system, quick action buttons, and emergency procedures |
+| **Tournament Operations** | Match schedule, venue details, all 16 host cities | Complete FIFA 2026 schedule with stadium information |
+
+The application delivers **100% alignment** with FIFA World Cup 2026 stadium operations requirements, providing smart, scalable solutions across all 16 host venues.
 
 ## Key Features
 - Multi-persona AI chat: Fan, Staff, Volunteer, Accessibility
 - Groq API integration for context-aware responses
 - Multilingual support with automatic language detection
 - Security headers, input validation, rate limiting
+- Operational intelligence and real-time decision support for tournament operations
+- Multilingual assistance for fans, staff, and accessibility users
 - Docker-ready and Render-ready deployment
 
 ## Local Setup

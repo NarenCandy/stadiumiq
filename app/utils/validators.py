@@ -175,7 +175,7 @@ def _check_message_length(message: str, config: AppConfig) -> None:
         raise ValidationError(ERROR_EMPTY_MESSAGE)
     if len(message) > config.MAX_MESSAGE_LENGTH:
         raise ValidationError(ERROR_MESSAGE_TOO_LONG)
-    if _contains_repetitive_content(message):
+    if _is_repetitive(message):
         logger.warning("Repetitive content detected in message")
         raise ValidationError(ERROR_REPETITIVE_MESSAGE)
 
@@ -259,11 +259,15 @@ def _validate_history_items(history: List[Any]) -> None:
             raise ValidationError(ERROR_NULL_BYTES)
 
 
-def _contains_repetitive_content(message: str) -> bool:
+def _is_repetitive(message: str) -> bool:
     """Detect highly repetitive content indicative of spam or noise.
 
-    A message is considered repetitive when it contains at least 5 tokens
-    and at least 4 of those tokens are duplicates of tokens seen earlier.
+    A message is considered repetitive when it contains repeated patterns
+    or phrases that make it look like spam. This implementation uses:
+    1. Single word repetition (e.g., "hello hello hello")
+    2. Repeated short sequences (e.g., "gate A gate A gate A")
+    3. Character-level repetition (e.g., "aaaaa")
+    4. Balanced detection with thresholds optimized for short messages
 
     Args:
         message: The stripped message string to analyse.
@@ -271,8 +275,56 @@ def _contains_repetitive_content(message: str) -> bool:
     Returns:
         True if the message is deemed repetitive, False otherwise.
     """
-    tokens = re.findall(r"[A-Za-z0-9]+", message.lower())
-    if len(tokens) < 5:
+    # Remove extra whitespace and normalize case
+    normalized = ' '.join(message.lower().split())
+    
+    # Too short to analyze meaningfully
+    if len(normalized) < 10:
         return False
-    repeated_token_count = len(tokens) - len(set(tokens))
-    return repeated_token_count >= 4
+    
+    words = normalized.split()
+    
+    # Check 1: Single word repetition (all words identical)
+    if len(words) >= 3 and len(set(words)) == 1:
+        return True
+    
+    # Check 2: Character-level repetition (e.g., "aaaaaa")
+    if len(normalized) >= 6:
+        unique_chars = set(normalized.replace(' ', ''))
+        if len(unique_chars) == 1:
+            return True
+    
+    # Check 3: Word frequency dominance
+    if len(words) >= 4:
+        word_counts: dict[str, int] = {}
+        for word in words:
+            word_counts[word] = word_counts.get(word, 0) + 1
+        
+        # If most frequent word appears > 50% of the time
+        max_count = max(word_counts.values())
+        if max_count / len(words) > 0.5:
+            return True
+    
+    # Check 4: Pattern repetition detection using sliding window
+    # Look for repeated sequences of 2-3 words
+    if len(words) >= 6:
+        for window_size in range(2, 4):
+            if window_size * 2 > len(words):
+                continue
+            
+            windows = []
+            for i in range(len(words) - window_size + 1):
+                window = ' '.join(words[i:i + window_size])
+                windows.append(window)
+            
+            # Check if any window appears multiple times
+            window_counts: dict[str, int] = {}
+            for window in windows:
+                window_counts[window] = window_counts.get(window, 0) + 1
+            
+            max_window_count = max(window_counts.values()) if window_counts else 0
+            # If a window appears at least twice and covers significant portion
+            if max_window_count >= 2 and max_window_count * window_size / len(words) > 0.5:
+                return True
+    
+    return False

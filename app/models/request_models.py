@@ -52,8 +52,22 @@ class ChatRequest:
     def to_chat_messages(self) -> List[ChatMessage]:
         """Convert the raw history list into typed ChatMessage objects.
 
+        Iterates over the history field and constructs a ChatMessage instance
+        for each entry, using safe defaults for missing fields.
+
         Returns:
             A list of ChatMessage instances derived from the history field.
+            Returns an empty list if history is empty.
+
+        Example:
+            request = ChatRequest(
+                message="hello",
+                persona="Fan",
+                language="English",
+                history=[{"role": "user", "content": "hi"}],
+            )
+            messages = request.to_chat_messages()
+            # Returns [ChatMessage(role="user", content="hi")]
         """
         return [
             ChatMessage(
