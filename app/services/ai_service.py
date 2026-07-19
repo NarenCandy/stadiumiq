@@ -23,7 +23,7 @@ Typical usage example:
 
 import logging
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Final, List, Optional
 
 from groq import Groq
 
@@ -41,9 +41,9 @@ from app.utils.exceptions import AIServiceError
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-_MAX_RETRY_ATTEMPTS: int = 3
-_RETRY_BASE_DELAY_SECONDS: float = 0.5
-_COMPLETION_TEMPERATURE: float = 0.7
+_MAX_RETRY_ATTEMPTS: Final[int] = 3
+_RETRY_BASE_DELAY_SECONDS: Final[float] = 0.5
+_COMPLETION_TEMPERATURE: Final[float] = 0.7
 
 
 class AIService:
