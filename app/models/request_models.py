@@ -1,7 +1,19 @@
-"""Request and Response models for the StadiumIQ chat route.
+"""Request and response data models for the StadiumIQ chat route.
 
-This module provides data models for validating and mapping incoming JSON requests
-and outgoing responses.
+This module defines lightweight dataclasses used to carry validated request
+data between the validation layer and the AI service layer.  No business logic
+or I/O operations are performed here.
+
+Main exports:
+    ChatMessage, ChatRequest, ChatResponse
+
+Typical usage example:
+    request = ChatRequest(
+        message="Where is Gate A?",
+        persona="Fan",
+        language="English",
+        history=[],
+    )
 """
 
 from dataclasses import dataclass, field
@@ -10,11 +22,11 @@ from typing import Any, Dict, List
 
 @dataclass
 class ChatMessage:
-    """Represents a single message in the chat history.
+    """A single message in a conversation history turn.
 
     Attributes:
-        role: The sender of the message, either 'user' or 'assistant'.
-        content: The text content of the message.
+        role: The sender identifier — either ``"user"`` or ``"assistant"``.
+        content: The text body of the message.
     """
 
     role: str
@@ -23,13 +35,13 @@ class ChatMessage:
 
 @dataclass
 class ChatRequest:
-    """Represents the incoming request payload for the AI chat.
+    """Validated incoming request payload for the AI chat endpoint.
 
     Attributes:
-        message: The user's query message.
-        persona: The chosen persona (e.g. Fan, Staff, Volunteer, Accessibility).
-        language: The target language for the response.
-        history: The list of prior messages in the conversation session.
+        message: The sanitised user query string.
+        persona: The chosen persona name (Fan, Staff, Volunteer, Accessibility).
+        language: The target response language name (e.g. "English").
+        history: Ordered list of prior conversation turns as role/content dicts.
     """
 
     message: str
@@ -38,27 +50,28 @@ class ChatRequest:
     history: List[Dict[str, str]] = field(default_factory=list)
 
     def to_chat_messages(self) -> List[ChatMessage]:
-        """Convert raw history dictionaries into a list of ChatMessage objects.
+        """Convert the raw history list into typed ChatMessage objects.
 
         Returns:
-            A list of ChatMessage instances.
+            A list of ChatMessage instances derived from the history field.
         """
-        messages: List[ChatMessage] = []
-        for msg in self.history:
-            messages.append(
-                ChatMessage(role=msg.get("role", "user"), content=msg.get("content", ""))
+        return [
+            ChatMessage(
+                role=turn.get("role", "user"),
+                content=turn.get("content", ""),
             )
-        return messages
+            for turn in self.history
+        ]
 
 
 @dataclass
 class ChatResponse:
-    """Represents the outgoing response payload.
+    """Outgoing response payload for the AI chat endpoint.
 
     Attributes:
         response: The generated assistant response string.
-        persona: The active assistant persona.
-        language: The active language.
+        persona: The persona that was active when the response was generated.
+        language: The language in which the response was generated.
     """
 
     response: str
@@ -66,10 +79,10 @@ class ChatResponse:
     language: str
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert the response object to a serializable dictionary.
+        """Serialise the response to a JSON-compatible dictionary.
 
         Returns:
-            A dictionary containing response, persona, and language keys.
+            A dictionary with ``response``, ``persona``, and ``language`` keys.
         """
         return {
             "response": self.response,

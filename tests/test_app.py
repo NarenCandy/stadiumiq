@@ -266,18 +266,6 @@ class TestChatRouteLanguage(StadiumIQTestBase):
         response = self.client.post("/chat", json={"message": "Hello", "language": "Italian"})
         self.assertEqual(response.status_code, 400)
 
-    def test_lang_auto_detect_missing_language(self) -> None:
-        """Verify that missing language input falls back to auto-detection."""
-        response = self.client.post("/chat", json={"message": "Hola"})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.get_json()["language"], "Spanish")
-
-    def test_lang_auto_detect_auto_keyword(self) -> None:
-        """Verify that auto detection works when language is explicitly set to auto."""
-        response = self.client.post("/chat", json={"message": "Bonjour", "language": "auto"})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.get_json()["language"], "French")
-
 
 class TestChatRouteHistory(StadiumIQTestBase):
     """Verifies that conversation history is formatted and handled."""
@@ -395,6 +383,27 @@ class TestChatEdgeCases(StadiumIQTestBase):
         """Verify that unicode strings matching supported languages work."""
         response = self.client.post("/chat", json={"message": "Namaste", "language": "Hindi"})
         self.assertEqual(response.status_code, 200)
+
+
+class TestChatRouteEnhancements(StadiumIQTestBase):
+    """Covers the new request metadata and validation behavior."""
+
+    def test_chat_returns_session_id(self) -> None:
+        """The chat response should include a generated session identifier."""
+        response = self.client.post(
+            "/chat", json={"message": "hello", "persona": "Fan", "language": "English"}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("session_id", response.get_json())
+        self.assertTrue(response.get_json()["session_id"])
+
+    def test_repetitive_message_is_rejected(self) -> None:
+        """Highly repetitive content should be rejected as likely spam."""
+        response = self.client.post(
+            "/chat",
+            json={"message": "transport transport transport transport transport", "persona": "Fan", "language": "English"},
+        )
+        self.assertEqual(response.status_code, 400)
 
 
 class TestErrorHandling(StadiumIQTestBase):

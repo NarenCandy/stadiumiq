@@ -3,40 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="StadiumIQ - The AI-powered FIFA World Cup 2026 Smart Stadium Assistant. Find navigation, sustainability tips, crowd management advice, match schedules, and multilingual support.">
+    <meta name="description" content="StadiumIQ - The AI-powered FIFA World Cup 2026 Smart Stadium Assistant. Find navigation, transportation, crowd management, accessibility routes, match schedules, and multilingual support.">
     <title>StadiumIQ - FIFA World Cup 2026 Smart Stadium Assistant</title>
-    <!-- Google Fonts: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome for Premium Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Main Style Sheet -->
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-
-    <!-- Skip Navigation Link for Accessibility -->
     <a href="#main-content" class="skip-link" id="skip-link-nav">Skip to main content</a>
-
-    <!-- Background Particle Canvas (Three.js) -->
     <canvas id="bg-canvas" class="background-canvas" aria-hidden="true"></canvas>
 
-    <!-- App Container -->
+    <!-- Real-Time Alerts Banner -->
+    <div id="alerts-banner" role="alert" aria-live="assertive" aria-label="Real-time stadium alerts" style="display:none; position:fixed; top:0; left:0; right:0; z-index:9999; padding:0.5rem 1rem; background:rgba(20,20,35,0.97); border-bottom:2px solid rgba(201,168,76,0.4);">
+        <div id="alerts-list" style="display:flex; flex-direction:column; gap:0.3rem; max-height:120px; overflow-y:auto;"></div>
+    </div>
+
     <div class="app-container">
-        
-        <!-- Header -->
         <header class="app-header" role="banner">
             <div class="header-logo">
                 <i class="fa-solid fa-trophy brand-icon" aria-hidden="true"></i>
                 <div class="brand-text">
                     <h1>StadiumIQ</h1>
-                    <span class="sub-brand">FIFA World Cup 2026</span>
+                    <span class="sub-brand">FIFA World Cup 2026 &bull; <span id="tournament-phase-label">Group Stage</span></span>
                 </div>
             </div>
-            
             <div class="header-actions">
-                <!-- Language Selector -->
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <label for="global-city-select" style="font-size:0.75rem; color:var(--color-text-muted); white-space:nowrap;">
+                        <i class="fa-solid fa-location-dot" aria-hidden="true"></i> Host City
+                    </label>
+                    <select id="global-city-select" class="styled-select" aria-label="Select FIFA 2026 host city" style="min-width:160px;">
+                        <option value="">All Cities</option>
+                        <option value="New York/New Jersey">New York/New Jersey</option>
+                        <option value="Los Angeles">Los Angeles</option>
+                        <option value="Dallas">Dallas</option>
+                        <option value="San Francisco Bay Area">San Francisco Bay Area</option>
+                        <option value="Miami">Miami</option>
+                        <option value="Seattle">Seattle</option>
+                        <option value="Boston">Boston</option>
+                        <option value="Houston">Houston</option>
+                        <option value="Kansas City">Kansas City</option>
+                        <option value="Philadelphia">Philadelphia</option>
+                        <option value="Toronto">Toronto</option>
+                        <option value="Vancouver">Vancouver</option>
+                        <option value="Mexico City">Mexico City</option>
+                        <option value="Guadalajara">Guadalajara</option>
+                        <option value="Monterrey">Monterrey</option>
+                        <option value="Atlanta">Atlanta</option>
+                    </select>
+                </div>
                 <div class="language-picker">
                     <label for="lang-select" class="sr-only">Select Language</label>
                     <i class="fa-solid fa-globe lang-icon" aria-hidden="true"></i>
@@ -51,7 +68,6 @@
                         <option value="Hindi">हिन्दी</option>
                     </select>
                 </div>
-                <!-- Status Badge -->
                 <div class="status-badge" id="app-status" aria-live="polite">
                     <span class="status-dot online"></span>
                     <span class="status-text">Connected</span>
@@ -59,12 +75,8 @@
             </div>
         </header>
 
-        <!-- Main Wrapper -->
         <div class="main-wrapper">
-            
-            <!-- Sidebar Navigation -->
             <aside class="sidebar" role="complementary" aria-label="Persona and Navigation Controls">
-                <!-- Persona Selection -->
                 <div class="sidebar-section">
                     <h2 class="section-title">Select Persona</h2>
                     <div class="persona-grid" role="radiogroup" aria-label="User Persona Selector">
@@ -86,72 +98,82 @@
                         </button>
                     </div>
                 </div>
-
-                <!-- Desktop Sidebar Tabs -->
                 <nav class="sidebar-nav" role="navigation" aria-label="Desktop Navigation">
                     <h2 class="section-title">Features</h2>
                     <div class="nav-links">
                         <button class="nav-link active" id="tab-btn-chat" data-target="panel-chat" aria-current="page">
-                            <i class="fa-solid fa-comments" aria-hidden="true"></i>
-                            <span>AI Assistant</span>
+                            <i class="fa-solid fa-comments" aria-hidden="true"></i><span>AI Assistant</span>
                         </button>
                         <button class="nav-link" id="tab-btn-nav" data-target="panel-navigation">
-                            <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
-                            <span>Stadium Nav</span>
+                            <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>Stadium Nav</span>
+                        </button>
+                        <button class="nav-link" id="tab-btn-transport" data-target="panel-transport">
+                            <i class="fa-solid fa-bus" aria-hidden="true"></i><span>Transport</span>
                         </button>
                         <button class="nav-link" id="tab-btn-match" data-target="panel-match">
-                            <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
-                            <span>Match Schedule</span>
+                            <i class="fa-solid fa-calendar-days" aria-hidden="true"></i><span>Match Schedule</span>
                         </button>
                         <button class="nav-link" id="tab-btn-crowd" data-target="panel-crowd">
-                            <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
-                            <span>Crowd Control</span>
+                            <i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>Crowd Control</span>
                         </button>
                         <button class="nav-link" id="tab-btn-sustainability" data-target="panel-sustainability">
-                            <i class="fa-solid fa-leaf" aria-hidden="true"></i>
-                            <span>Eco Initiative</span>
+                            <i class="fa-solid fa-leaf" aria-hidden="true"></i><span>Eco Initiative</span>
                         </button>
                     </div>
                 </nav>
             </aside>
 
-            <!-- Main Content Area -->
             <main class="main-content" id="main-content" role="main" tabindex="-1">
-                
+
                 <!-- 1. AI CHAT ASSISTANT PANEL -->
                 <section class="panel-section active" id="panel-chat" aria-label="AI Chat Assistant">
                     <div class="panel-header">
                         <div class="panel-info">
                             <h2 class="panel-title">AI Smart Assistant</h2>
-                            <p class="panel-subtitle" id="chat-persona-indicator">Currently guiding you in Fan Mode</p>
+                            <p class="panel-subtitle" id="chat-persona-indicator">Currently guiding you in Fan Mode &bull; <span id="chat-phase-badge" style="color:var(--color-gold); font-size:0.8em;">Group Stage</span></p>
                         </div>
                         <button class="action-btn" id="clear-chat-btn" aria-label="Clear chat history">
-                            <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
-                            <span>Clear Chat</span>
+                            <i class="fa-solid fa-trash-can" aria-hidden="true"></i><span>Clear Chat</span>
                         </button>
                     </div>
-                    
+
+                    <!-- Quick Action Buttons -->
+                    <div id="quick-actions" role="group" aria-label="Quick action shortcuts" style="display:flex; flex-wrap:wrap; gap:0.5rem; padding:0 0 0.75rem 0;">
+                        <button class="action-btn quick-action-btn" data-query="Where is the nearest emergency exit from my section?" aria-label="Find nearest exit">
+                            <i class="fa-solid fa-door-open" aria-hidden="true"></i> Find nearest exit
+                        </button>
+                        <button class="action-btn quick-action-btn" data-query="What are the transport options to get to the stadium and back?" aria-label="Transport options">
+                            <i class="fa-solid fa-bus" aria-hidden="true"></i> Transport options
+                        </button>
+                        <button class="action-btn quick-action-btn" data-query="What is the current crowd status and which gates are less congested?" aria-label="Crowd status">
+                            <i class="fa-solid fa-people-group" aria-hidden="true"></i> Crowd status
+                        </button>
+                        <button class="action-btn quick-action-btn" data-query="I need emergency help — who should I contact and where is the nearest medical station?" aria-label="Emergency help">
+                            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Emergency help
+                        </button>
+                        <button class="action-btn quick-action-btn" data-query="What accessibility services and wheelchair routes are available at this venue?" aria-label="Accessibility services">
+                            <i class="fa-solid fa-wheelchair" aria-hidden="true"></i> Accessibility services
+                        </button>
+                    </div>
+
                     <div class="chat-container">
                         <div class="chat-messages" id="chat-box" role="log" aria-live="polite" aria-relevant="additions">
-                            <!-- Welcome Message -->
                             <div class="chat-message assistant-message">
                                 <div class="message-meta">
                                     <span class="message-sender"><i class="fa-solid fa-robot" aria-hidden="true"></i> StadiumIQ</span>
                                     <span class="message-time">Just Now</span>
                                 </div>
                                 <div class="message-content">
-                                    Welcome to the FIFA World Cup 2026 Smart Stadium Assistant! I can help you with stadium navigation, crowd management, accessibility routes, eco-transportation, and real-time decision support. How can I help you today?
+                                    Welcome to the FIFA World Cup 2026 Smart Stadium Assistant! I can help you with stadium navigation, transportation, crowd management, accessibility routes, eco-transport, and real-time decision support across all 16 host cities. How can I help you today?
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Chat Input Form -->
                         <form class="chat-input-form" id="chat-form" novalidate>
                             <label for="chat-message-input" class="sr-only">Type your message</label>
-                            <input type="text" id="chat-message-input" class="chat-input" placeholder="Ask about gates, accessibility, transit, etc..." autocomplete="off" maxlength="2000" required>
+                            <input type="text" id="chat-message-input" class="chat-input" placeholder="Ask about gates, transport, accessibility, crowd status..." autocomplete="off" maxlength="2000" required>
                             <button type="submit" id="chat-send-btn" class="send-btn" aria-label="Send message">
                                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                    <path d="M3 12.75L21 3l-9 18-3-7.5L3 12.75z" fill="currentColor" />
+                                    <path d="M3 12.75L21 3l-9 18-3-7.5L3 12.75z" fill="currentColor"/>
                                 </svg>
                             </button>
                         </form>
@@ -163,43 +185,65 @@
                     <div class="panel-header">
                         <div class="panel-info">
                             <h2 class="panel-title">Interactive Zone Guide</h2>
-                            <p class="panel-subtitle">Explore entrances, parking zones, elevators, and accessibility channels.</p>
+                            <p class="panel-subtitle">FIFA 2026 venue-specific gate assignments, accessibility entrances, VIP routes, emergency exits, and medical stations.</p>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <label for="nav-city-select" style="font-size:0.8rem; color:var(--color-text-muted); white-space:nowrap;">Venue:</label>
+                            <select id="nav-city-select" class="styled-select" aria-label="Select host city venue">
+                                <option value="MetLife Stadium">MetLife Stadium — NY/NJ</option>
+                                <option value="SoFi Stadium">SoFi Stadium — Los Angeles</option>
+                                <option value="AT&T Stadium">AT&T Stadium — Dallas</option>
+                                <option value="Hard Rock Stadium">Hard Rock Stadium — Miami</option>
+                                <option value="Mercedes-Benz Stadium">Mercedes-Benz Stadium — Atlanta</option>
+                                <option value="Levi's Stadium">Levi's Stadium — SF Bay Area</option>
+                                <option value="Lumen Field">Lumen Field — Seattle</option>
+                                <option value="Gillette Stadium">Gillette Stadium — Boston</option>
+                                <option value="NRG Stadium">NRG Stadium — Houston</option>
+                                <option value="Arrowhead Stadium">Arrowhead Stadium — Kansas City</option>
+                                <option value="Lincoln Financial Field">Lincoln Financial Field — Philadelphia</option>
+                                <option value="BMO Field">BMO Field — Toronto</option>
+                                <option value="BC Place">BC Place — Vancouver</option>
+                                <option value="Estadio Azteca">Estadio Azteca — Mexico City</option>
+                                <option value="Estadio Akron">Estadio Akron — Guadalajara</option>
+                                <option value="Estadio BBVA">Estadio BBVA — Monterrey</option>
+                            </select>
                         </div>
                     </div>
-                    
                     <div class="navigation-grid">
                         <div class="stadium-map-container glass-card">
                             <div class="visual-map" id="visual-map-display">
-                                <!-- Interactive Zone Map using SVG -->
                                 <svg viewBox="0 0 400 400" width="100%" height="100%" class="stadium-svg" aria-label="Stadium Floor Plan Layout">
-                                    <circle cx="200" cy="200" r="180" class="stadium-ring-outer" />
-                                    <circle cx="200" cy="200" r="140" class="stadium-ring-middle" />
-                                    <circle cx="200" cy="200" r="100" class="stadium-ring-inner" />
-                                    <rect x="150" y="150" width="100" height="100" class="stadium-pitch" rx="10" />
-                                    
-                                    <!-- Zones clickable -->
-                                    <path d="M 200,200 L 200,20 A 180,180 0 0,1 380,200 Z" class="map-zone" id="zone-north" role="button" aria-label="North Stand - General Admission, Gate A" tabindex="0" />
-                                    <path d="M 200,200 L 380,200 A 180,180 0 0,1 200,380 Z" class="map-zone" id="zone-east" role="button" aria-label="East Stand - Family Zone, Gate B" tabindex="0" />
-                                    <path d="M 200,200 L 200,380 A 180,180 0 0,1 20,200 Z" class="map-zone" id="zone-south" role="button" aria-label="South Stand - Accessibility Entrance, Elevators, Gate C" tabindex="0" />
-                                    <path d="M 200,200 L 20,200 A 180,180 0 0,1 200,20 Z" class="map-zone" id="zone-west" role="button" aria-label="West Stand - VIP/Press Box, Gate D" tabindex="0" />
-
-                                    <!-- Markers -->
-                                    <circle cx="200" cy="40" r="8" class="map-marker gate-marker" id="marker-gate-a" />
-                                    <circle cx="360" cy="200" r="8" class="map-marker gate-marker" id="marker-gate-b" />
-                                    <circle cx="200" cy="360" r="8" class="map-marker accessibility-marker" id="marker-gate-c" />
-                                    <circle cx="40" cy="200" r="8" class="map-marker emergency-marker" id="marker-gate-d" />
+                                    <circle cx="200" cy="200" r="180" class="stadium-ring-outer"/>
+                                    <circle cx="200" cy="200" r="140" class="stadium-ring-middle"/>
+                                    <circle cx="200" cy="200" r="100" class="stadium-ring-inner"/>
+                                    <rect x="150" y="150" width="100" height="100" class="stadium-pitch" rx="10"/>
+                                    <path d="M 200,200 L 200,20 A 180,180 0 0,1 380,200 Z" class="map-zone" id="zone-north" role="button" aria-label="North Stand — General Admission, Gate A" tabindex="0"/>
+                                    <path d="M 200,200 L 380,200 A 180,180 0 0,1 200,380 Z" class="map-zone" id="zone-east" role="button" aria-label="East Stand — Family Zone, Gate B" tabindex="0"/>
+                                    <path d="M 200,200 L 200,380 A 180,180 0 0,1 20,200 Z" class="map-zone" id="zone-south" role="button" aria-label="South Stand — Accessibility Entrance, Gate C" tabindex="0"/>
+                                    <path d="M 200,200 L 20,200 A 180,180 0 0,1 200,20 Z" class="map-zone" id="zone-west" role="button" aria-label="West Stand — VIP/Press, Gate D" tabindex="0"/>
+                                    <!-- Gate entrances (gold) -->
+                                    <circle cx="200" cy="40" r="9" class="map-marker gate-marker" title="Gate A — General Admission"/>
+                                    <circle cx="360" cy="200" r="9" class="map-marker gate-marker" title="Gate B — Family Zone"/>
+                                    <!-- Accessibility entrance (green) -->
+                                    <circle cx="200" cy="360" r="9" class="map-marker accessibility-marker" title="Gate C — Accessibility Entrance"/>
+                                    <!-- Emergency exit (red) -->
+                                    <circle cx="40" cy="200" r="9" class="map-marker emergency-marker" title="Gate D — Emergency Exit / VIP"/>
+                                    <!-- Medical station (blue) -->
+                                    <circle cx="200" cy="200" r="7" fill="#3498db" opacity="0.85" title="Medical Station — Central"/>
+                                    <text x="200" y="204" text-anchor="middle" fill="#fff" font-size="8" font-family="sans-serif" aria-hidden="true">MED</text>
                                 </svg>
                             </div>
                             <div class="map-legend">
                                 <span class="legend-item"><span class="legend-color gate"></span>Gate Entrance</span>
-                                <span class="legend-item"><span class="legend-color accessibility"></span>ADA Elevators / Ramp</span>
+                                <span class="legend-item"><span class="legend-color accessibility"></span>ADA / Accessibility</span>
                                 <span class="legend-item"><span class="legend-color emergency"></span>Emergency Exit</span>
+                                <span class="legend-item"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#3498db;margin-right:4px;vertical-align:middle;"></span>Medical Station</span>
                             </div>
                         </div>
-                        
                         <div class="navigation-info-panel glass-card">
                             <h3>Zone Navigation Center</h3>
-                            <p class="select-hint-text">Click or focus on a zone on the stadium plan to view detailed operational directions.</p>
+                            <p id="nav-venue-label" style="font-size:0.8rem; color:var(--color-gold); margin-bottom:0.5rem;">MetLife Stadium — New York/New Jersey</p>
+                            <p class="select-hint-text">Click a zone to view gate assignments, section type, medical stations, accessibility features, and emergency exit routes.</p>
                             <div class="zone-details-box" id="zone-details-display" aria-live="polite">
                                 <h4 id="zone-display-title">Select a Stand / Section</h4>
                                 <div class="zone-features-list" id="zone-display-content">
@@ -210,253 +254,260 @@
                     </div>
                 </section>
 
-                <!-- 3. MATCH INFO PANEL -->
+                <!-- 3. TRANSPORTATION PANEL -->
+                <section class="panel-section" id="panel-transport" aria-label="Transportation Guide">
+                    <div class="panel-header">
+                        <div class="panel-info">
+                            <h2 class="panel-title">Transportation Hub</h2>
+                            <p class="panel-subtitle">Shuttles, parking, rideshare zones, and accessible transport for all 16 FIFA 2026 host cities.</p>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <label for="transport-city-select" style="font-size:0.8rem; color:var(--color-text-muted); white-space:nowrap;">City:</label>
+                            <select id="transport-city-select" class="styled-select" aria-label="Select host city for transport info">
+                                <option value="New York/New Jersey">New York/New Jersey</option>
+                                <option value="Los Angeles">Los Angeles</option>
+                                <option value="Dallas">Dallas</option>
+                                <option value="San Francisco Bay Area">San Francisco Bay Area</option>
+                                <option value="Miami">Miami</option>
+                                <option value="Seattle">Seattle</option>
+                                <option value="Boston">Boston</option>
+                                <option value="Houston">Houston</option>
+                                <option value="Kansas City">Kansas City</option>
+                                <option value="Philadelphia">Philadelphia</option>
+                                <option value="Toronto">Toronto</option>
+                                <option value="Vancouver">Vancouver</option>
+                                <option value="Mexico City">Mexico City</option>
+                                <option value="Guadalajara">Guadalajara</option>
+                                <option value="Monterrey">Monterrey</option>
+                                <option value="Atlanta">Atlanta</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="transport-info-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1rem;">
+                        <div class="glass-card" style="padding:1.2rem;">
+                            <h3 style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.6rem;">
+                                <i class="fa-solid fa-bus-simple" aria-hidden="true" style="color:#3498db;"></i> Shuttle &amp; Transit
+                            </h3>
+                            <p id="transport-shuttle" style="font-size:0.9rem; line-height:1.6;">Select a city above.</p>
+                        </div>
+                        <div class="glass-card" style="padding:1.2rem;">
+                            <h3 style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.6rem;">
+                                <i class="fa-solid fa-square-parking" aria-hidden="true" style="color:#c9a84c;"></i> Parking Zones
+                            </h3>
+                            <p id="transport-parking" style="font-size:0.9rem; line-height:1.6;">Select a city above.</p>
+                        </div>
+                        <div class="glass-card" style="padding:1.2rem;">
+                            <h3 style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.6rem;">
+                                <i class="fa-solid fa-car-side" aria-hidden="true" style="color:#2ecc71;"></i> Rideshare Pickup
+                            </h3>
+                            <p id="transport-rideshare" style="font-size:0.9rem; line-height:1.6;">Select a city above.</p>
+                        </div>
+                        <div class="glass-card" style="padding:1.2rem;">
+                            <h3 style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.6rem;">
+                                <i class="fa-solid fa-wheelchair-move" aria-hidden="true" style="color:#e74c3c;"></i> Accessible Transport
+                            </h3>
+                            <p id="transport-accessible" style="font-size:0.9rem; line-height:1.6;">Select a city above.</p>
+                        </div>
+                    </div>
+                    <div class="glass-card" style="padding:1.2rem; margin-top:1rem;">
+                        <p style="font-size:0.85rem; color:var(--color-text-muted);">
+                            <i class="fa-solid fa-circle-info" aria-hidden="true" style="color:var(--color-gold);"></i>
+                            &nbsp;Tip: Use the AI Assistant to ask detailed transport questions for any host city. Quick action button "Transport options" is also available on the Chat panel.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- 4. MATCH INFO PANEL -->
                 <section class="panel-section" id="panel-match" aria-label="Match Schedule and Venues">
                     <div class="panel-header">
                         <div class="panel-info">
                             <h2 class="panel-title">FIFA 2026 Match Schedule</h2>
-                            <p class="panel-subtitle">Plan your matchday schedule across host cities in US, Canada, and Mexico.</p>
+                            <p class="panel-subtitle">Plan your matchday across all 16 host cities in the United States, Canada, and Mexico.</p>
                         </div>
                     </div>
-
                     <div class="matches-container glass-card">
                         <div class="table-responsive">
                             <table class="schedule-table" id="schedule-data-table">
                                 <thead>
                                     <tr>
-                                        <th scope="col">Match ID</th>
+                                        <th scope="col">Match</th>
+                                        <th scope="col">Phase</th>
                                         <th scope="col">Host City</th>
                                         <th scope="col">Stadium</th>
                                         <th scope="col">Date</th>
-                                        <th scope="col">Featured Teams</th>
-                                        <th scope="col">Action</th>
+                                        <th scope="col">Teams</th>
+                                        <th scope="col">Info</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>M01</td>
-                                        <td>Mexico City</td>
-                                        <td>Estadio Azteca</td>
-                                        <td>June 11, 2026</td>
-                                        <td>Mexico vs Group A2</td>
-                                        <td><button class="info-details-btn" data-city="Mexico City" aria-label="View Estadio Azteca details">Details</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td>M02</td>
-                                        <td>Toronto</td>
-                                        <td>BMO Field</td>
-                                        <td>June 12, 2026</td>
-                                        <td>Canada vs Group B2</td>
-                                        <td><button class="info-details-btn" data-city="Toronto" aria-label="View BMO Field details">Details</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td>M03</td>
-                                        <td>Los Angeles</td>
-                                        <td>SoFi Stadium</td>
-                                        <td>June 12, 2026</td>
-                                        <td>USA vs Group C2</td>
-                                        <td><button class="info-details-btn" data-city="Los Angeles" aria-label="View SoFi Stadium details">Details</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td>M04</td>
-                                        <td>Dallas</td>
-                                        <td>AT&T Stadium</td>
-                                        <td>June 14, 2026</td>
-                                        <td>Group D1 vs Group D2</td>
-                                        <td><button class="info-details-btn" data-city="Dallas" aria-label="View AT&T Stadium details">Details</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td>M05</td>
-                                        <td>Miami</td>
-                                        <td>Hard Rock Stadium</td>
-                                        <td>June 15, 2026</td>
-                                        <td>Group E1 vs Group E2</td>
-                                        <td><button class="info-details-btn" data-city="Miami" aria-label="View Hard Rock Stadium details">Details</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td>M06</td>
-                                        <td>New York/New Jersey</td>
-                                        <td>MetLife Stadium</td>
-                                        <td>June 16, 2026</td>
-                                        <td>Group F1 vs Group F2</td>
-                                        <td><button class="info-details-btn" data-city="New York/New Jersey" aria-label="View MetLife Stadium details">Details</button></td>
-                                    </tr>
+                                    <tr><td>M01</td><td>Group Stage</td><td>Mexico City</td><td>Estadio Azteca</td><td>Jun 11 2026</td><td>Mexico vs Group A2</td><td><button class="info-details-btn" data-city="Mexico City" aria-label="View Estadio Azteca details">Details</button></td></tr>
+                                    <tr><td>M02</td><td>Group Stage</td><td>Toronto</td><td>BMO Field</td><td>Jun 12 2026</td><td>Canada vs Group B2</td><td><button class="info-details-btn" data-city="Toronto" aria-label="View BMO Field details">Details</button></td></tr>
+                                    <tr><td>M03</td><td>Group Stage</td><td>Los Angeles</td><td>SoFi Stadium</td><td>Jun 12 2026</td><td>USA vs Group C2</td><td><button class="info-details-btn" data-city="Los Angeles" aria-label="View SoFi Stadium details">Details</button></td></tr>
+                                    <tr><td>M04</td><td>Group Stage</td><td>Dallas</td><td>AT&amp;T Stadium</td><td>Jun 14 2026</td><td>Group D1 vs D2</td><td><button class="info-details-btn" data-city="Dallas" aria-label="View AT&T Stadium details">Details</button></td></tr>
+                                    <tr><td>M05</td><td>Group Stage</td><td>Miami</td><td>Hard Rock Stadium</td><td>Jun 15 2026</td><td>Group E1 vs E2</td><td><button class="info-details-btn" data-city="Miami" aria-label="View Hard Rock Stadium details">Details</button></td></tr>
+                                    <tr><td>M06</td><td>Group Stage</td><td>New York/New Jersey</td><td>MetLife Stadium</td><td>Jun 16 2026</td><td>Group F1 vs F2</td><td><button class="info-details-btn" data-city="New York/New Jersey" aria-label="View MetLife Stadium details">Details</button></td></tr>
+                                    <tr><td>M07</td><td>Group Stage</td><td>Seattle</td><td>Lumen Field</td><td>Jun 17 2026</td><td>Group G1 vs G2</td><td><button class="info-details-btn" data-city="Seattle" aria-label="View Lumen Field details">Details</button></td></tr>
+                                    <tr><td>M08</td><td>Group Stage</td><td>Boston</td><td>Gillette Stadium</td><td>Jun 18 2026</td><td>Group H1 vs H2</td><td><button class="info-details-btn" data-city="Boston" aria-label="View Gillette Stadium details">Details</button></td></tr>
+                                    <tr><td>M09</td><td>Group Stage</td><td>Houston</td><td>NRG Stadium</td><td>Jun 19 2026</td><td>Group I1 vs I2</td><td><button class="info-details-btn" data-city="Houston" aria-label="View NRG Stadium details">Details</button></td></tr>
+                                    <tr><td>M10</td><td>Group Stage</td><td>Kansas City</td><td>Arrowhead Stadium</td><td>Jun 20 2026</td><td>Group J1 vs J2</td><td><button class="info-details-btn" data-city="Kansas City" aria-label="View Arrowhead Stadium details">Details</button></td></tr>
+                                    <tr><td>M11</td><td>Group Stage</td><td>Philadelphia</td><td>Lincoln Financial Field</td><td>Jun 21 2026</td><td>Group K1 vs K2</td><td><button class="info-details-btn" data-city="Philadelphia" aria-label="View Lincoln Financial Field details">Details</button></td></tr>
+                                    <tr><td>M12</td><td>Group Stage</td><td>San Francisco Bay Area</td><td>Levi's Stadium</td><td>Jun 22 2026</td><td>Group L1 vs L2</td><td><button class="info-details-btn" data-city="San Francisco Bay Area" aria-label="View Levi's Stadium details">Details</button></td></tr>
+                                    <tr><td>M13</td><td>Group Stage</td><td>Vancouver</td><td>BC Place</td><td>Jun 23 2026</td><td>Group A3 vs B3</td><td><button class="info-details-btn" data-city="Vancouver" aria-label="View BC Place details">Details</button></td></tr>
+                                    <tr><td>M14</td><td>Group Stage</td><td>Guadalajara</td><td>Estadio Akron</td><td>Jun 24 2026</td><td>Group C3 vs D3</td><td><button class="info-details-btn" data-city="Guadalajara" aria-label="View Estadio Akron details">Details</button></td></tr>
+                                    <tr><td>M15</td><td>Group Stage</td><td>Monterrey</td><td>Estadio BBVA</td><td>Jun 25 2026</td><td>Group E3 vs F3</td><td><button class="info-details-btn" data-city="Monterrey" aria-label="View Estadio BBVA details">Details</button></td></tr>
+                                    <tr><td>M16</td><td>Group Stage</td><td>Atlanta</td><td>Mercedes-Benz Stadium</td><td>Jun 26 2026</td><td>Group G3 vs H3</td><td><button class="info-details-btn" data-city="Atlanta" aria-label="View Mercedes-Benz Stadium details">Details</button></td></tr>
+                                    <tr><td>QF1</td><td>Quarter-final</td><td>Dallas</td><td>AT&amp;T Stadium</td><td>Jul 14 2026</td><td>QF Winner A vs B</td><td><button class="info-details-btn" data-city="Dallas" aria-label="View AT&T Stadium details">Details</button></td></tr>
+                                    <tr><td>SF1</td><td>Semi-final</td><td>Atlanta</td><td>Mercedes-Benz Stadium</td><td>Jul 21 2026</td><td>SF Winner 1 vs 2</td><td><button class="info-details-btn" data-city="Atlanta" aria-label="View Mercedes-Benz Stadium details">Details</button></td></tr>
+                                    <tr><td>FIN</td><td>Final</td><td>New York/New Jersey</td><td>MetLife Stadium</td><td>Jul 26 2026</td><td>TBD vs TBD</td><td><button class="info-details-btn" data-city="New York/New Jersey" aria-label="View MetLife Stadium final details">Details</button></td></tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </section>
 
-                <!-- 4. CROWD MANAGEMENT PANEL -->
+                <!-- 5. CROWD MANAGEMENT PANEL -->
                 <section class="panel-section" id="panel-crowd" aria-label="Crowd Control Density Visualizer">
                     <div class="panel-header">
                         <div class="panel-info">
-                            <h2 class="panel-title">Crowd Density Simulation</h2>
-                            <p class="panel-subtitle">Real-time crowd flow, density indicators, and safe evacuation guidelines.</p>
+                            <h2 class="panel-title">Crowd Density &amp; Decision Support</h2>
+                            <p class="panel-subtitle">Real-time crowd flow, density indicators, operational recommendations, and evacuation guidance.</p>
                         </div>
                         <div class="simulation-controls">
-                            <button class="action-btn" id="simulate-density-btn" aria-label="Update crowd simulation density">
-                                <i class="fa-solid fa-rotate" aria-hidden="true"></i>
-                                <span>Recalculate Flow</span>
+                            <button class="action-btn" id="simulate-density-btn" aria-label="Recalculate crowd simulation density">
+                                <i class="fa-solid fa-rotate" aria-hidden="true"></i><span>Recalculate Flow</span>
                             </button>
                         </div>
                     </div>
-
                     <div class="crowd-grid">
                         <div class="crowd-visualizer-container glass-card">
-                            <canvas id="crowd-canvas" class="crowd-canvas" aria-label="Crowd Density Visualizer Canvas Grid" tabindex="0"></canvas>
+                            <canvas id="crowd-canvas" class="crowd-canvas" aria-label="Crowd Density Visualizer Canvas" tabindex="0"></canvas>
                         </div>
-                        
                         <div class="crowd-metrics glass-card">
                             <h3>Real-Time Crowd Metrics</h3>
-                            
                             <div class="metric-card">
                                 <div class="metric-info">
                                     <span class="metric-title">Overall Density</span>
                                     <span class="metric-value" id="metric-density-val">Moderate (54%)</span>
                                 </div>
                                 <div class="metric-bar-container">
-                                    <div class="metric-bar" id="metric-density-bar" style="width: 54%; background-color: #f39c12;"></div>
+                                    <div class="metric-bar" id="metric-density-bar" style="width:54%; background-color:#f39c12;"></div>
                                 </div>
                             </div>
-                            
+                            <!-- Density level badge -->
+                            <div id="density-level-badge" style="margin:0.5rem 0; padding:0.4rem 0.8rem; border-radius:999px; display:inline-block; font-size:0.8rem; font-weight:600; background:rgba(243,156,18,0.15); color:#f39c12; border:1px solid rgba(243,156,18,0.4);">
+                                ⚠ MODERATE — Moderate operational protocols active
+                            </div>
                             <div class="metric-alerts" id="density-alerts-box" aria-live="polite">
                                 <div class="alert-item warning">
                                     <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-                                    <div>
-                                        <strong>Gate B Congestion</strong>
-                                        <p>High traffic density detected near east stand. Safe zone alternates: Route via South Gate C.</p>
-                                    </div>
+                                    <div><strong>Gate B Congestion</strong><p>High traffic near east stand. Alternate route: South Gate C.</p></div>
                                 </div>
                                 <div class="alert-item success">
                                     <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-                                    <div>
-                                        <strong>Evacuation Routes Clear</strong>
-                                        <p>Emergency exits and elevator banks fully clear. Accessibility flows optimal.</p>
-                                    </div>
+                                    <div><strong>Evacuation Routes Clear</strong><p>Emergency exits and elevator banks fully clear. Accessibility flows optimal.</p></div>
                                 </div>
                             </div>
-                            
                             <div class="evac-guide">
-                                <h4>Decision Support Evacuation Steps</h4>
-                                <ol class="evac-steps">
-                                    <li>Refer to nearest green indicator exit routes.</li>
-                                    <li>Keep corridors and ramps clear for accessibility wheels.</li>
-                                    <li>Follow instructions from staff members on the floor.</li>
+                                <h4>Decision Support — Evacuation Steps</h4>
+                                <ol class="evac-steps" id="evac-steps-list">
+                                    <li>Monitor zone density gauges and alert your sector supervisor.</li>
+                                    <li>Refer to nearest green indicator exit routes on the stadium map.</li>
+                                    <li>Keep corridors and ramps clear for wheelchair and mobility users.</li>
+                                    <li>Follow instructions from on-floor staff and broadcast announcements.</li>
                                 </ol>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- 5. SUSTAINABILITY PANEL -->
+                <!-- 6. SUSTAINABILITY PANEL -->
                 <section class="panel-section" id="panel-sustainability" aria-label="Sustainability Initiatives and Tips">
                     <div class="panel-header">
                         <div class="panel-info">
                             <h2 class="panel-title">Green Initiatives</h2>
-                            <p class="panel-subtitle">Our commitment to holding a sustainable FIFA World Cup tournament.</p>
+                            <p class="panel-subtitle">FIFA World Cup 2026 sustainability goals and fan eco-challenge.</p>
                         </div>
                     </div>
-
                     <div class="eco-grid">
                         <div class="eco-card glass-card">
                             <div class="eco-icon-wrapper" aria-hidden="true">
                                 <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-                                    <rect x="8" y="18" width="48" height="24" rx="6" ry="6" />
-                                    <rect x="14" y="24" width="12" height="8" rx="2" ry="2" />
-                                    <rect x="38" y="24" width="12" height="8" rx="2" ry="2" />
-                                    <circle cx="20" cy="48" r="6" />
-                                    <circle cx="44" cy="48" r="6" />
+                                    <rect x="8" y="18" width="48" height="24" rx="6" ry="6"/>
+                                    <rect x="14" y="24" width="12" height="8" rx="2" ry="2"/>
+                                    <rect x="38" y="24" width="12" height="8" rx="2" ry="2"/>
+                                    <circle cx="20" cy="48" r="6"/><circle cx="44" cy="48" r="6"/>
                                 </svg>
                             </div>
                             <h3>Green Transportation</h3>
-                            <p>Utilize integrated stadium transit systems. We provide electric shuttle pathways and secured bicycle lock stations at all entrances.</p>
+                            <p>Electric shuttle pathways, bicycle lock stations, and stadium matchday transit passes are available at all 16 host venues.</p>
                         </div>
                         <div class="eco-card glass-card">
                             <div class="eco-icon-wrapper" aria-hidden="true">
                                 <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-                                    <path d="M32 10a22 22 0 1 0 22 22A22 22 0 0 0 32 10zm0 40a18 18 0 1 1 18-18 18 18 0 0 1-18 18z" />
-                                    <path d="M34 16l-8 8h6v6l8-8h-6zm8 22a6 6 0 0 1-6 6h-4v6h4a12 12 0 0 0 0-24h-6v6h6a6 6 0 0 1 6 6zm-20 2a6 6 0 0 1 6-6h4v-6h-4a12 12 0 0 0 0 24h6v-6h-6a6 6 0 0 1-6-6z" />
+                                    <path d="M32 10a22 22 0 1 0 22 22A22 22 0 0 0 32 10zm0 40a18 18 0 1 1 18-18 18 18 0 0 1-18 18z"/>
                                 </svg>
                             </div>
                             <h3>Zero Waste Program</h3>
-                            <p>Ensure composting and recycling bins are utilized. All tournament food vendors use 100% biodegradable and compostable packages.</p>
+                            <p>Color-coded composting, recycling, and waste bins at every food court. All vendors use 100% biodegradable packaging.</p>
                         </div>
                         <div class="eco-card glass-card">
                             <div class="eco-icon-wrapper" aria-hidden="true">
                                 <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-                                    <circle cx="32" cy="32" r="10" />
-                                    <path d="M32 2v10m0 40v10m30-30H42m-20 0H2m43.7-19.7l-7.1 7.1m-25.2 25.2l-7.1 7.1m0-32.3l7.1 7.1m25.2 25.2l7.1 7.1" stroke-width="4" stroke="currentColor" stroke-linecap="round" fill="none" />
+                                    <circle cx="32" cy="32" r="10"/>
+                                    <path d="M32 2v10m0 40v10m30-30H42m-20 0H2" stroke-width="4" stroke="currentColor" stroke-linecap="round" fill="none"/>
                                 </svg>
                             </div>
-                            <h3>Renewable energy</h3>
-                            <p>Stadias are optimized with retrofitted micro solar installations and smart grid micro-coolings, conserving up to 40% more electricity.</p>
+                            <h3>Renewable Energy</h3>
+                            <p>Smart LED lighting and solar micro-installations at all venues conserve up to 40% more electricity per matchday.</p>
                         </div>
                     </div>
-
                     <div class="eco-tips-section glass-card">
                         <h3>Fan Eco-Challenge: Be an Agent of Change</h3>
                         <div class="tips-accordion">
                             <details class="tip-detail" open>
                                 <summary class="tip-summary">Bring reusable water containers</summary>
-                                <div class="tip-content">
-                                    Multiple filtered water refilling stations are placed next to every major elevator bank. Refill for free and reduce plastic footprint!
-                                </div>
+                                <div class="tip-content">Multiple filtered water refilling stations are placed next to every major elevator bank. Refill for free and reduce plastic footprint!</div>
                             </details>
                             <details class="tip-detail">
                                 <summary class="tip-summary">Sort your waste at the bins</summary>
-                                <div class="tip-content">
-                                    Color-coded disposal bins are situated across all food court walkways. Green for compostable items, blue for recycling, black for trash.
-                                </div>
+                                <div class="tip-content">Green for compostable, blue for recycling, black for trash — across all food court walkways.</div>
                             </details>
                             <details class="tip-detail">
                                 <summary class="tip-summary">Take public transit routes</summary>
-                                <div class="tip-content">
-                                    Your matchday stadium pass includes complimentary light-rail, streetcars, and electric transit shuttle access. Safe, cheap, and eco-friendly!
-                                </div>
+                                <div class="tip-content">Your matchday pass includes complimentary light-rail, streetcar, and electric shuttle access at all 16 venues.</div>
                             </details>
                         </div>
                     </div>
                 </section>
-                
+
             </main>
         </div>
 
-        <!-- Footer -->
         <footer class="app-footer" role="contentinfo">
             <p>&copy; 2026 FIFA Smart Tournament Operations. Built for PromptWars: Virtual Challenge 4.</p>
         </footer>
 
-        <!-- Mobile Bottom Navigation Bar -->
         <nav class="mobile-nav" role="navigation" aria-label="Mobile Navigation">
             <button class="mobile-nav-link active" id="mob-btn-chat" data-target="panel-chat" aria-current="page">
-                <i class="fa-solid fa-comments" aria-hidden="true"></i>
-                <span>Chat</span>
+                <i class="fa-solid fa-comments" aria-hidden="true"></i><span>Chat</span>
             </button>
             <button class="mobile-nav-link" id="mob-btn-nav" data-target="panel-navigation">
-                <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
-                <span>Nav</span>
+                <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>Nav</span>
+            </button>
+            <button class="mobile-nav-link" id="mob-btn-transport" data-target="panel-transport">
+                <i class="fa-solid fa-bus" aria-hidden="true"></i><span>Transport</span>
             </button>
             <button class="mobile-nav-link" id="mob-btn-match" data-target="panel-match">
-                <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
-                <span>Matches</span>
+                <i class="fa-solid fa-calendar-days" aria-hidden="true"></i><span>Matches</span>
             </button>
             <button class="mobile-nav-link" id="mob-btn-crowd" data-target="panel-crowd">
-                <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
-                <span>Crowd</span>
-            </button>
-            <button class="mobile-nav-link" id="mob-btn-sustainability" data-target="panel-sustainability">
-                <i class="fa-solid fa-leaf" aria-hidden="true"></i>
-                <span>Eco</span>
+                <i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>Crowd</span>
             </button>
         </nav>
     </div>
 
-    <!-- GSAP for Smooth Animations -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <!-- Three.js for Particle Backgrounds -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- App Main Script -->
     <script src="/static/script.js"></script>
 </body>
 </html>
